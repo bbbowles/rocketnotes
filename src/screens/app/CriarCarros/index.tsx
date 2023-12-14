@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet, Alert, ToastAndroid } from "react-native";
+import { View, Text, Pressable, StyleSheet, Alert, ToastAndroid, PermissionsAndroid, Image } from "react-native";
 import { useForm, Controller } from "react-hook-form"
 import { Input } from "../../../components/input";
 import { Form } from "react-hook-form";
@@ -16,6 +16,7 @@ import {
 } from "./styles";
 import DatePicker from "react-native-date-picker";
 import { useTheme } from "../../../hooks/themeContext";
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 
 export function CriarCarros({ route }: { route: any }) {
     const [date, setDate] = useState(new Date())
@@ -24,6 +25,7 @@ export function CriarCarros({ route }: { route: any }) {
     const popUp = useRef(true)
     const [realEdit, setRealEdit] = useState<boolean>(false)
     const { currentTheme } = useTheme()
+    const [response, setResponse] = useState<any>(null);
     const {
         control,
         handleSubmit,
@@ -148,6 +150,82 @@ export function CriarCarros({ route }: { route: any }) {
         isedit()
 
     }, [])
+
+    const handleCamera = useCallback(() => {
+        async function requestCameraPermission() {
+            try {
+                const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+                    {
+                        title: 'Cool Photo App Camera Permission',
+                        message:
+                            'Cool Photo App needs access to your camera ' +
+                            'so you can take awesome pictures.',
+                        buttonNeutral: 'Ask Me Later',
+                        buttonNegative: 'Cancel',
+                        buttonPositive: 'OK',
+                    }
+                );
+                PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+                {
+                    title: 'Cool Photo App Camera Permission',
+                    message:
+                        'Cool Photo App needs access to your camera ' +
+                        'so you can take awesome pictures.',
+                    buttonNeutral: 'Ask Me Later',
+                    buttonNegative: 'Cancel',
+                    buttonPositive: 'OK',
+                }
+                if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                    console.log('You can use the camera');
+                } else {
+                    console.log('Camera permission denied');
+                }
+            } catch (err) {
+                console.warn(err);
+            }
+        };
+        async function handle() {
+
+
+            try {
+                const result = await launchCamera({
+                    saveToPhotos: true,
+                    mediaType: 'photo',
+                    includeBase64: false,
+                    cameraType: "back",
+                    includeExtra: true
+                }, setResponse)
+
+                console.log(result)
+
+                const formData = new FormData()
+                formData.append('file', {
+                    name: result.assets[0].fileName,
+                    type: result.assets[0].type,
+                    uri: result.assets[0].uri,
+                  });
+
+                // axios.post(glbVars.BACKEND_URL + "carsadmin/image", {formData}
+                // )
+                fetch(glbVars.BACKEND_URL + "carsadmin/image",{
+                    method:"post",
+                    body:formData,
+                    headers: {
+                        "Content-Type": "multipart/form-data "
+                      }
+                })
+                console.log("response", response.assets[0])
+            } catch (e: any) {
+                console.log(e)
+            }
+
+
+        }
+        requestCameraPermission()
+        handle()
+    }, [])
+
     useEffect(() => {
         fetchusers()
         isEdit()
@@ -158,8 +236,15 @@ export function CriarCarros({ route }: { route: any }) {
     return (
         <CenteredView >
             <ModalView >
-
                 <ModalText>Nome</ModalText>
+                <View style={{ width: "100%" }}>
+                    <Image
+                        resizeMode="cover"
+                        resizeMethod="scale"
+                        style={{ width: 50, height: 50, zIndex: 999, position: "absolute" }}
+                        source={{ uri: response?.assets[0].uri }}
+                    />
+                </View>
                 <Controller
                     control={control}
                     rules={{
@@ -231,7 +316,7 @@ export function CriarCarros({ route }: { route: any }) {
                             <RNPickerSelect
                                 // placeholder="Selecione um item..."
                                 onValueChange={onChange}
-                                style={{inputAndroid:{color:currentTheme.colors.lightest}}}
+                                style={{ inputAndroid: { color: currentTheme.colors.lightest } }}
                                 value={value}
                                 items={dataSource.map((data: any) => {
 
@@ -239,6 +324,28 @@ export function CriarCarros({ route }: { route: any }) {
                                 })}
                             />
                         </RNPickerView>
+                    )}
+                    name="user_id"
+                />
+
+                <ModalText>Foto</ModalText>
+
+                <Controller
+                    control={control}
+                    rules={{
+                        required: true,
+                    }}
+                    render={({ field: { onChange, onBlur, value } }) => (
+                        <View>
+                            <Pressable
+                                style={{ width: "100%", backgroundColor: "red" }}
+                                onPress={() => handleCamera()}>
+                                <Text>Cam</Text>
+                            </Pressable>
+                            <Pressable>
+                                <Text>Gal</Text>
+                            </Pressable>
+                        </View>
                     )}
                     name="user_id"
                 />
@@ -257,8 +364,8 @@ export function CriarCarros({ route }: { route: any }) {
 
                     <Pressable
                         style={[styles.button, styles.buttonClose]}
-                        onPress={()=>console.log("boa")}
-                        >
+                        onPress={() => console.log("boa")}
+                    >
                         <TextStyle>Cancelar</TextStyle>
                     </Pressable>
 

@@ -15,7 +15,7 @@ export const FooterView = styled.View`
 `
 
 export const CenteredView = styled.View`
-    background-color:${props => props.theme.colors.darkest};
+    /* background-color:${props => props.theme.colors.darkest}; */
     flex:1;
     justify-content:center;
     align-items:center;
