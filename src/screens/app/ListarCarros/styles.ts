@@ -70,3 +70,60 @@ export const TextWhiteShadow = styled.Text`
 
     
 `
+export const ModalView = styled.View`
+    display:flex;
+    align-items:center;
+    position:absolute;
+    justify-content:flex-start;
+    width:100%;
+    bottom:0;
+    background-color:rgba(0,0,0,0.5);
+    padding:0 10px;
+    height:100%;
+
+`
+
+export const CustomImage = styled.Image`
+    width:100%;
+    height:100%;
+`
+
+export const ModalText = styled.Text`
+    color:${props => props.theme.colors.lightest};
+  
+    /* font-size:40px; */
+    font-weight:bold;
+
+
+`
+
+export const ModalTextView = styled.View`
+    display:block;
+    position:absolute;
+    z-index:999;
+
+    top:18%;
+    left:5%;
+
+    border: 3px solid #3f3f41;
+
+    background-color:${props => props.theme.colors.dark};
+    border-radius:10px;
+
+`
+
+export const ExitModalButton = styled.Pressable`
+color:white;
+    position: absolute;
+    top:16%;
+    left:90%;
+    z-index:999;
+    font-size:40px;
+    font-weight:bold;
+    background-color:rgba(0,0,0,0.2);
+
+    border-radius:30px;
+
+
+
+`

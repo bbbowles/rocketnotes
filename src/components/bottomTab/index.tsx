@@ -22,7 +22,7 @@ import { useTheme } from "../../hooks/themeContext";
 function Carros({ navigation }: { navigation: any }) {
   const Stack = createNativeStackNavigator();
   const [dataSource, setDataSource] = useState<any>()
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [dataSourceUsers, setDataSourceUsers] = useState<any>([])
   const user_id = useRef()
 

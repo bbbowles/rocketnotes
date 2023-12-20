@@ -22,6 +22,7 @@ export const CenteredView = styled.View`
 `
 
 export const ModalView = styled.View`
+    z-index:999;
     width:100%;
     margin:20px;
     background-color:${props => props.theme.colors.darkest};
@@ -67,6 +68,7 @@ export const CloseButton = styled.Pressable`
 
 export const RNPickerView = styled.View`
     width:100%;
+    height:auto;
     background-color:${props => props.theme.colors.dark};
     border:2px solid rgba(0,0,0,0.2);
     border-radius:10px;
@@ -78,3 +80,73 @@ export const DatePickerView = styled.View`
     border:2px solid rgba(0,0,0,0.2);
     border-radius:10px;
 `
+
+export const PhotoPickerView = styled.View`
+    width: 90%;
+    aspect-ratio:1/1;
+    /* padding-bottom: 90%;  */
+    /* 1:1 Aspect Ratio */
+    /* position: relative; If you want text inside of it */
+
+    /* margin-bottom:20%; */
+
+    /* background-color:${props => props.theme.colors.dark}; */
+    border:3px solid white;
+    border-style:dashed;
+
+
+`
+
+export const OpenCameraButton = styled.Pressable`
+    display:flex;
+    justify-content:center; 
+    align-items:center;
+
+
+    position:absolute;
+
+    display:table-cell;
+
+
+
+    width:50%;
+    height:auto;
+
+    text-align:center;
+
+    padding-bottom: 182%;
+    background-color:rgba(0,0,0,0.4);
+    
+
+`
+
+export const OpenGalleryButton = styled.Pressable`
+    position:absolute;
+
+    width:50%;
+    margin-left: 50%;
+    height:auto;
+
+    text-align:center;
+
+    padding-bottom: 190%;
+    background-color:rgba(0,0,0,0.2);
+
+    /* background-color:rgba(255,255,255,0.2); */
+`
+export const ModalImageBackground = styled.ImageBackground`
+    display:flex;
+    /* justify-content:center;  */
+    /* align-items:center; */
+
+
+    /* width:100%; */
+    height:100%;
+
+
+
+    /* position:absolute; */
+    
+
+`
+

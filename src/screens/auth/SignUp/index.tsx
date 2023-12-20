@@ -6,6 +6,8 @@ import { Input } from "../../../components/input";
 import { useForm, Controller } from "react-hook-form"
 import { useTheme } from "../../../hooks/themeContext";
 import { isDarkTheme } from "../../../services/isDarkTheme";
+import { glbVars } from "../../../../globalVars";
+import axios from "axios";
 // import { Button } from "../../../components/button";
 export function SignUp({ navigation }: { navigation: any }) {
     // se eu passar o containerimage sem ser uma child do Container, apenas sendo do View, ele quebra
@@ -21,7 +23,14 @@ export function SignUp({ navigation }: { navigation: any }) {
             password: "",
         },
     })
-    const onSubmit = (data: any) => console.log(data)
+    const onSubmit = (data: any) => {
+        console.log(data)
+        axios.post(glbVars.BACKEND_URL+"users",{
+            email:data.email,
+            password:data.password,
+            name:data.username
+        })
+    }
     return (
         <Container>
             <ContainerImage

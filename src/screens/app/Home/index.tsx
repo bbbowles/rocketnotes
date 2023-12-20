@@ -1,4 +1,4 @@
-import { Text, ScrollView } from "react-native";
+import { Text, ScrollView, Image } from "react-native";
 import { BottomTab } from "../../../components/bottomTab";
 import { ViewCustom, BigText } from "./styles";
 import { useAuth } from "../../../hooks/auth";
@@ -37,6 +37,8 @@ export function Home() {
                 <BigText>
                     Bem-Vindo {user} !
                 </BigText>
+
+               
             </ScrollView>
         </ViewCustom>
     )
