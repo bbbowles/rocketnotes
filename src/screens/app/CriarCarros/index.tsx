@@ -1,4 +1,7 @@
-import { View, Text, Pressable, StyleSheet, Alert, ToastAndroid, PermissionsAndroid, Image, ScrollView, ImageBackground, Button } from "react-native";
+import {
+    View, Text, Pressable, StyleSheet, Alert, ToastAndroid, PermissionsAndroid, Image, ScrollView, ImageBackground,
+    Button, FlatList, Dimensions
+} from "react-native";
 import { useForm, Controller } from "react-hook-form"
 import { Input } from "../../../components/input";
 import { Form } from "react-hook-form";
@@ -19,6 +22,10 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import DatePicker from "react-native-date-picker";
 import { useTheme } from "../../../hooks/themeContext";
+
+import ImagePicker from 'react-native-image-crop-picker';
+
+
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 
 export function CriarCarros({ navigation, route }: { navigation: any, route: any }) {
@@ -29,7 +36,7 @@ export function CriarCarros({ navigation, route }: { navigation: any, route: any
     const [realEdit, setRealEdit] = useState<boolean>(false)
     const { currentTheme } = useTheme()
     const [image, setImage] = useState<FormData>()
-    const [response, setResponse] = useState<any>(null);
+    const [response, setResponse] = useState<object[]>([]);
     const {
         control,
         handleSubmit,
@@ -102,12 +109,12 @@ export function CriarCarros({ navigation, route }: { navigation: any, route: any
                 // })
             }
         }
-        console.log(realEdit)
+        console.log("realedit", realEdit)
 
         realEdit ? edit() : create()
 
-        
-        // if (realEdit) {
+
+        // if (realEdit) {'
         //     console.log("é editar", realEdit)
         //     edit()
         // } else {
@@ -118,7 +125,9 @@ export function CriarCarros({ navigation, route }: { navigation: any, route: any
 
         console.log(data)
 
-    }, [])
+    }, [realEdit])
+
+    // faltou declarar como dependencia
 
 
     const fetchusers = useCallback((): void => {
@@ -132,35 +141,47 @@ export function CriarCarros({ navigation, route }: { navigation: any, route: any
         }
         fetch()
     }, [])
+
+
     const onSubmit = (data: any) => {
+        // deve ser response.Correct ou algo assim
+        console.log(response)
 
-        if (response) {
-            console.log("if")
+        if (response[0]) {
+            console.log("foi colocado foto no onSumit")
+            console.log(response[0])
 
-            const imagename = String(Math.random()).replace(".", "")
 
-            const formData = new FormData()
-            formData.append('file', {
-                type: response.assets[0].type,
-                uri: response.assets[0].uri,
-                name: imagename
-            });
+            response[0].map((image: any) => {
 
-            fetch(glbVars.BACKEND_URL + "carsadmin/image", {
-                method: "post",
-                body: formData,
-                headers: {
-                    "Content-Type": "multipart/form-data "
-                }
-            })
+                const imagename = String(Math.random()).replace(".", "")
 
-            createOrEditCar({ names: data.names, brand: data.brand, year: data.year ? data.year : date, user_id: data.user_id, image: imagename })
+                const formData = new FormData()
+                formData.append('file', {
+                    type: image.mime,
+                    uri: image.path,
+                    name: imagename
+                });
 
-        } else {
-            console.log("else")
-            createOrEditCar({ names: data.names, brand: data.brand, year: data.year ? data.year : date, user_id: data.user_id, image: null })
+                console.log("FORM DATA=>>>>>>>>>", formData)
+
+                fetch(glbVars.BACKEND_URL + "carsadmin/image", {
+                    method: "post",
+                    body: formData,
+                    headers: {
+                        "Content-Type": "multipart/form-data "
+                    }
+                })
+
+                console.log("depois do fetch")
+
+            }
+            )
 
         }
+        createOrEditCar({ names: data.names, brand: data.brand, year: data.year ? data.year : date, user_id: data.user_id })
+
+
 
 
     }
@@ -188,6 +209,7 @@ export function CriarCarros({ navigation, route }: { navigation: any, route: any
                 setDate(new Date(dbCar.data.year)) //nao sei como o banco esta recebendo strings como int mas n vou mudar agora
                 setValue("user_id", dbCar.data.user_id)
                 setImage(dbCar.data.image)
+
             }
             return true
         }
@@ -231,13 +253,14 @@ export function CriarCarros({ navigation, route }: { navigation: any, route: any
 
 
             try {
-                const result = await launchCamera({
-                    saveToPhotos: true,
-                    mediaType: 'photo',
-                    includeBase64: false,
-                    cameraType: "back",
-                    includeExtra: true
-                }, setResponse)
+                const result = await ImagePicker.openCamera({
+                    multiple: true,
+                    useFrontCamera: true,
+                    mediaType: "photo"
+                }).then(images => {
+                    setResponse(arrayAntigo => [...arrayAntigo, images]);
+                });
+
 
                 // if (result.assets) {
                 //     const formData = new FormData()
@@ -265,6 +288,7 @@ export function CriarCarros({ navigation, route }: { navigation: any, route: any
     const handleGallery = useCallback(() => {
         async function requestCameraPermission() {
             try {
+                console.log("try")
                 const granted = await PermissionsAndroid.request(
                     PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
                     {
@@ -296,11 +320,12 @@ export function CriarCarros({ navigation, route }: { navigation: any, route: any
         };
         async function handle() {
             try {
-                const result = await launchImageLibrary({
-                    mediaType: 'photo',
-                    includeBase64: false,
-                    includeExtra: true
-                }, setResponse)
+                const result = await ImagePicker.openPicker({
+                    multiple: true,
+                    mediaType: "photo"
+                }).then(images => {
+                    setResponse(arrayAntigo => [...arrayAntigo, images]);
+``                });
 
             } catch (e: any) {
                 console.log(e)
@@ -312,22 +337,47 @@ export function CriarCarros({ navigation, route }: { navigation: any, route: any
 
     }, [])
 
-    const handlePhotoDelete = useCallback((image:any) => {
+    const handlePhotoDelete = useCallback((image: any) => {
 
-        async function handle(){
-            await axios.delete(glbVars.BACKEND_URL+`carsAdmin/image/${image}`)
+        async function handle() {
+            await axios.delete(glbVars.BACKEND_URL + `carsAdmin/image/${image}`)
         }
         handle()
 
     }, [])
 
     useEffect(() => {
+        console.log("jahajkhajkhn")
         fetchusers()
         isEdit()
         console.log(realEdit)
+        console.log(dataSource)
+
+        realEdit ? console.log("sim") : console.log("nao")
 
 
-    }, [realEdit])
+    }, [])
+
+    type ItemData = {
+        // id: string;
+        uri: string;
+    };
+    const DATA: ItemData[] = [
+        {
+            // id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
+            uri: "http://192.168.1.20:3002/carimg/06034881160044515.png",
+            // http://192.168.1.20:3002/carimg/06034881160044515.png
+
+        },
+        {
+            // id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
+            uri: 'https://thenaritadogfight.com/wp-content/uploads/2023/06/NDF-Asai-1.jpg',
+        },
+        {
+            // id: '58694a0f-3da1-471f-bd96-145571e29d72',
+            uri: 'https://thenaritadogfight.com/wp-content/uploads/2023/06/NDF-Asai-4.jpg',
+        },
+    ];
 
     return (
         <CenteredView >
@@ -434,14 +484,6 @@ export function CriarCarros({ navigation, route }: { navigation: any, route: any
                         render={({ field: { onChange, onBlur, value } }) => (
 
                             <PhotoPickerView>
-                                <ModalImageBackground
-                                    resizeMode="cover"
-                                    source={{
-                                        uri: response?.assets[0].uri ? response?.assets[0].uri :
-
-                                        glbVars.BACKEND_URL + `carimg/${image}.png`
-                                    }}
-                                />
 
                                 <OpenCameraButton
                                     onPress={() => handleCamera()}>
@@ -460,12 +502,48 @@ export function CriarCarros({ navigation, route }: { navigation: any, route: any
                             </PhotoPickerView>
                         )}
                         name="image" />
-                    <View style={{marginBottom:600}}>
-                        <Button
-                            onPress={() => handlePhotoDelete(image)}
-                            title="Apagar Foto"
-                        />
-                    </View>
+                    <Image
+                        resizeMode="cover"
+                        resizeMethod="scale"
+                        style={{ width: 50, height: 50, zIndex: 999, position: "absolute" }}
+                        source={{ uri: response[0] ? response[0].path : null }}
+                    />
+                    <FlatList
+                        data={
+                            DATA
+                        }
+                        horizontal={true}
+
+                        snapToAlignment="center"
+                        decelerationRate={"fast"}
+                        snapToInterval={Dimensions.get("window").width}
+
+                        renderItem={({ item }) =>
+                            <View style={{ marginBottom: "10%" }}>
+                                <View
+                                    style={{ width: Dimensions.get("window").width, height: Dimensions.get("window").height / 2 }}
+                                >
+
+
+                                    <ImageBackground
+                                        // width={Dimensions.get("window").width}
+                                        // height={Dimensions.get("window").height/2}
+                                        style={{ width: "100%", height: "100%" }}
+                                        resizeMode="cover"
+                                        // style={{ marginTop: 100 }}
+                                        source={item}
+                                    />
+
+                                </View>
+                                <Button
+                                    onPress={() => handlePhotoDelete(image)}
+                                    title="Apagar Foto"
+                                />
+                            </View>
+
+                        }
+                    />
+
                 </ScrollView>
 
 

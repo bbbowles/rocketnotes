@@ -137,7 +137,7 @@ export const OpenGalleryButton = styled.Pressable`
 export const ModalImageBackground = styled.ImageBackground`
     display:flex;
     /* justify-content:center;  */
-    /* align-items:center; */
+    align-items:center;
 
 
     /* width:100%; */
