@@ -1,5 +1,5 @@
 import { Component, useCallback, useEffect, useState, useRef } from "react";
-import { FlatList, RefreshControl, ActivityIndicator, View, Pressable, Modal, Image, Text } from "react-native";
+import { FlatList, RefreshControl, ActivityIndicator, View, Pressable, Modal, ImageBackground, Text, Dimensions, Button } from "react-native";
 import {
     PressableBottom, PressableTop, BigText,
     GridViewContainerFlex, GridViewContainer, SmallText,
@@ -13,7 +13,6 @@ import { glbVars } from "../../../../globalVars";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { useTheme } from "../../../hooks/themeContext";
-
 
 
 export function ListarCarros({ navigation, route }: { navigation: any, route: any }) {
@@ -105,7 +104,7 @@ export function ListarCarros({ navigation, route }: { navigation: any, route: an
 
 
 
-
+    console.log("alo")
     return (
         <BackgroundView>
             {/* <ScrollView
@@ -130,6 +129,7 @@ export function ListarCarros({ navigation, route }: { navigation: any, route: an
 
                 <FlatList
                     data={dataSource}
+
 
                     refreshControl={
                         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -222,13 +222,39 @@ export function ListarCarros({ navigation, route }: { navigation: any, route: an
 }
 
 export function CustomModal(props: any) {
-    let { isVisible, item, onClose,  /*...*/ } = props;
-
+    let { isVisible,
+        item,
+        onClose,  /*...*/ } = props;
+    const [images, setImages] = useState()
 
     console.log(item)
-    if (item == undefined) {
-        item = false
-    }
+
+    const getImages = useCallback((item: any) => {
+        async function getimages(item: any) {
+            const dbCarImages = await axios.get((glbVars.BACKEND_URL + `cars/images/${item.id}`))
+
+            // let uri = []
+            // uri = dbCarImages.data!.map((i: any) => {
+
+            //     return glbVars.BACKEND_URL + `carimg/${i.image}`
+
+            // })
+
+
+            setImages(dbCarImages.data)
+
+        }
+        getimages(item)
+    }, [])
+
+
+
+    useEffect(() => {
+        getImages(item)
+    }, [item])
+
+
+    console.log(images)
 
 
     return <Modal
@@ -266,13 +292,39 @@ export function CustomModal(props: any) {
                 >
                     <AntDesign name="close" color={"white"} size={30} />
                 </ExitModalButton>
-                <CustomImage
-                    resizeMode="center"
-                    source={{
-                        uri: glbVars.BACKEND_URL + `carimg/${item.image}.png`
+                <FlatList
+                        data={
+                            images
+                        }
+                        horizontal={true}
 
-                    }}
-                />
+                        snapToAlignment="center"
+                        decelerationRate={"fast"}
+                        snapToInterval={Dimensions.get("window").width}
+
+                        renderItem={({ item }) =>
+                            <View style={{ marginBottom: "10%" }}>
+                                <View
+                                    style={{ width: Dimensions.get("window").width, height: Dimensions.get("window").height / 2 }}
+                                >
+
+
+                                    <ImageBackground
+                                        // width={Dimensions.get("window").width}
+                                        // height={Dimensions.get("window").height/2}
+                                        style={{ width: "100%", height: "100%", marginTop: Dimensions.get("window").height / 4 }}
+                                        resizeMode="cover"
+                                        // style={{ marginTop: 1 }}
+                                        source={{
+                                            uri: glbVars.BACKEND_URL + `carimg/${item.image}`
+                                        }}
+                                    />
+
+                                </View>
+                            </View>
+
+                        }
+                    />
             </ModalView>
         }</Modal>; // Render things inside the data
 }
